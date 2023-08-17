@@ -18,7 +18,7 @@
 
 package io.github.kevinah95
 
-interface Nesting {
-    val nameInSpace: String
+open class Nesting {
+    open val nameInSpace: String
         get() = ""
 }

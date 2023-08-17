@@ -23,7 +23,7 @@ import io.github.kevinah95.klizard_languages.CodeReader
 import io.github.kevinah95.klizard_languages.getReaderFor
 
 class FileAnalyzer(extensions: List<(Sequence<String>, CodeReader) -> Sequence<String>>) {
-    lateinit var processors: List<(Sequence<String>, CodeReader) -> Sequence<String>>
+    var processors: List<(Sequence<String>, CodeReader) -> Sequence<String>>
 
     init {
         processors = extensions

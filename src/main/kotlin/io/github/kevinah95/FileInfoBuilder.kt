@@ -28,7 +28,7 @@ class FileInfoBuilder(filename: String) {
     var stackedFunctions: MutableList<FunctionInfo> = mutableListOf()
     var _nestingStack = NestingStack()
 
-    //TODO: decorate_nesting_stack
+    //TODO: To do verify this. I dont know why this is decorated, but I use _nestingStack instead of decorate_nesting_stack.
 
     fun popNesting() {
         val nest = _nestingStack.popNesting()

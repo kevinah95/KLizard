@@ -46,7 +46,7 @@ class NestingStack {
         if (tmp != null) {
             return tmp as Nesting
         }
-        return TODO("Provide the return value BARE_NESTING")
+        return Nesting()
     }
 
     fun popNesting(): Nesting? {

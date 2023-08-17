@@ -18,4 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 
+- [~] lizard.py
+  - [x] Nesting interface
+  - [x] Namespace class
+  - [~] FunctionInfo class
+    - [~] Check `parameters` property
+  - [~] FileInformation class
+    - [ ] Implement `max_nesting_depth` property this is an extension method
+  - [~] NestingStack class
+    - [~] Almost done. `var functionStack` probable not necessary
+  - [~] FileInfoBuilder class
+    - [~] Almost done. I don't know why this is decorated, but I use `_nestingStack` instead of `decorate_nesting_stack` method
+  - [~] FileAnalyzer class
+    - [ ] `__call__` method
+    - [ ] implement `RecursionError`
 - Initial commit 

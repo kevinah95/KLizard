@@ -18,7 +18,7 @@
 
 package io.github.kevinah95
 
-class Namespace(val name: String) : Nesting {
+class Namespace(val name: String) : Nesting() {
 
     override val nameInSpace: String
         get() = if (name.isNotEmpty()) "$name::" else ""

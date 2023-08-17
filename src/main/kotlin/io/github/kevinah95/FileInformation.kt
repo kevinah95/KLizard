@@ -60,5 +60,5 @@ class FileInformation(
         get() = functionList.sumOf { it.cyclomaticComplexity }
 
     val ND: Int
-        get() = TODO("max_nesting_depth property")
+        get() = TODO("max_nesting_depth property this is an extension")
 }

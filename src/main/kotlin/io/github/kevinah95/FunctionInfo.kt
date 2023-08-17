@@ -18,7 +18,7 @@
 
 package io.github.kevinah95
 
-class FunctionInfo (var name: String, var filename: String, var startLine: Int = 0,  ccn: Int = 1): Nesting {
+class FunctionInfo (var name: String, var filename: String, var startLine: Int = 0,  ccn: Int = 1): Nesting() {
 
     var tokenCount: Int
     var cyclomaticComplexity: Int
@@ -33,7 +33,7 @@ class FunctionInfo (var name: String, var filename: String, var startLine: Int =
     init {
         cyclomaticComplexity = ccn
         nloc = 1
-        tokenCount = 1
+        tokenCount = 1  // the first token
         longName = name
         endLine = startLine
         fullParameters = mutableListOf()
@@ -49,14 +49,15 @@ class FunctionInfo (var name: String, var filename: String, var startLine: Int =
     val unqualifiedName: String
         get() = name.split("::").last()
 
-    //TODO: location
+    val location: String
+        get() = " $name@$startLine-$endLine@$filename"
 
     val parameterCount: Int
         get() = fullParameters.size
 
+    // TODO: Verify this.
     val parameters : List<String>
         get() {
-
             val matches = fullParameters.map { Regex("""(\w+)(\s=.*)?${'$'}""").matchEntire(it) }
             return matches.filterNotNull().map { it.groupValues[1] }
         }
