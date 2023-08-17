@@ -37,6 +37,7 @@ gradle-app.setting
 
 ### macOS template
 # General
+.DS_Store
 .AppleDouble
 .LSOverride
 
