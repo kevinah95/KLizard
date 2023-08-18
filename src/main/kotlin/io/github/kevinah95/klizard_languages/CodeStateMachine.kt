@@ -21,7 +21,7 @@ package io.github.kevinah95.klizard_languages
 import io.github.kevinah95.FileInfoBuilder
 
 open class CodeStateMachine(val context: FileInfoBuilder) {
-    lateinit var savedState: (token: String) -> Unit
+    var savedState: (token: String) -> Unit
 
     var lastToken: String? = null
     var toExit: Boolean = false
@@ -43,9 +43,9 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
         return CodeStateMachine(this.context)
     }
 
-    fun next(state: ((token: String) -> Unit)? = null, token: String? = null): String? {
+    fun next(state: ((token: String) -> Unit)? = null, token: String? = null): Boolean? {
         _state = state
-        return token
+        return token?.let { CodeStateMachine(context)(it) }
     }
 
     fun nextIf(state: ((token: String) -> Unit)? = null, token: String, expected: String) {
@@ -67,7 +67,7 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
     }
 
     operator fun invoke(token: String, reader: CodeReader? = null): Boolean? {
-        if (_state?.let { it(token) } != null) {
+        if (_state?.invoke(token) != null) {
             next(savedState)
             if (callback != null) {
                 callback?.let { it() }

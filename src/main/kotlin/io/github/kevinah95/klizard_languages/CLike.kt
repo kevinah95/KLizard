@@ -100,7 +100,7 @@ class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             if (token == "=") {
                 context.addCondition(-1)
             }
-            next(_stateGlobal, null)
+            next(_stateGlobal)
         }
 
     fun _typedef(token: String, tokens: List<String>) =
@@ -108,29 +108,14 @@ class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             context.addCondition(-tokens.count { it == "&&" })
             next(_stateGlobal)
         }
+
+    fun _typedef2 (token: String, tokens: List<String>) {
+        readUntilThen(";", token, ::_typedef)
+    }
+
+//    val r = readUntilThen(";", token) { token: String, tokens: List<String> ->
+//        context.addCondition(-tokens.count { it == "&&" })
+//        next(_stateGlobal)
+//    }
 }
 
-class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(context) {
-    val __namespace_separators = listOf("<", ":", "final", "[", "extends", "implements")
-
-    override val _stateGlobal: (token: String) -> Unit = {token ->
-        if (token == "template") {
-            //_state = _template_declaration
-        } else if (token == ".") {
-            _state = dot
-        } else if (token in setOf("struct", "class", "namespace", "union")) {
-            _state = dot
-        }
-    }
-
-    val dot: ((token: String) -> Unit)
-        get() { return _stateGlobal }
-
-    fun _templateDeclaration(token: String? = null) = readInsideBracketsThen("<>", "_state_global", token) {
-        //do nothing
-    }
-
-    fun _readAttribute() = readInsideBracketsThen("[]", "_read_namespace", null) {
-        //do nothing
-    }
-}

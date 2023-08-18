@@ -103,4 +103,8 @@ class FileInfoBuilder(filename: String) {
             globalPseudoFunction
         }
     }
+
+    fun addNamespace(token: String) {
+        _nestingStack.addNamespace(token)
+    }
 }
