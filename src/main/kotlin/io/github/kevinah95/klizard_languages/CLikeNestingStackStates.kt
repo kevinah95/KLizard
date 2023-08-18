@@ -25,13 +25,13 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
 
     override var commandsByName = listOf(::_stateGlobal, ::_readNamespace).associateBy { it.name }
 
-    override val _stateGlobal: (token: String) -> Unit = { token ->
+    override fun _stateGlobal(token: String) {
         if (token == "template") {
             _state = ::_templateDeclaration
         } else if (token == ".") {
             _state = _dot
         } else if (token in setOf("struct", "class", "namespace", "union")) {
-            _state = _readNamespace
+            _state = ::_readNamespace
         } else if (token == "{") {
             context._nestingStack.addBareNesting()
         } else if (token == "}") {
@@ -40,10 +40,12 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
     }
 
     val _dot: ((token: String) -> Unit)
-        get() { return _stateGlobal }
+        get() {
+            return ::_stateGlobal
+        }
 
-    val _readNamespace: (token: String) -> Unit = { token ->
-        if (token == "["){
+    fun _readNamespace(token: String) {
+        if (token == "[") {
             _state = ::_readAttribute
         } else {
             _state = _readNamespaceName
@@ -52,12 +54,13 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
 
 
     val _readNamespaceName = readUntilThen(")({;") { token: String, saved: List<String> ->
-        _state = _stateGlobal
+        _state = ::_stateGlobal
         if (token == "{") {
             val namespace = saved.takeWhile { it in __namespace_separators }.joinToString("")
             context.addNamespace(namespace)
         }
     }
+
     fun _templateDeclaration(token: String? = null) = readInsideBracketsThen("<>", "_stateGlobal", token) {
         //do nothing
     }

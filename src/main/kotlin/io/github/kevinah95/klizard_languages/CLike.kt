@@ -38,15 +38,16 @@ class CLikeReader : CodeReader(), CCppCommentsMixin {
     val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
 
     init {
+
+    }
+
+    override operator fun invoke(_context: FileInfoBuilder) {
+        context = _context
         parallelStates = listOf(
             CLikeStates(context),
             CLikeNestingStackStates(context),
             CppRValueRefStates(context)
         )
-    }
-
-    override operator fun invoke(_context: FileInfoBuilder) {
-        context = _context
     }
 
     override fun preprocess(tokens: Sequence<String>) = sequence<String> {
@@ -88,10 +89,10 @@ class CLikeReader : CodeReader(), CCppCommentsMixin {
 
 class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
-    override val _stateGlobal: (token: String) -> Unit = {
-        if (it == "&&") {
+    override fun _stateGlobal (token: String){
+        if (token == "&&") {
             next(_rValueRef)
-        } else if (it == "typedef") {
+        } else if (token == "typedef") {
             next(_typedef)
         }
     }
@@ -100,13 +101,13 @@ class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
         if (token == "=") {
             context.addCondition(-1)
         }
-        next(_stateGlobal)
+        next(::_stateGlobal)
     }
 
 
     val _typedef = readUntilThen(";") { _: String, tokens: List<String> ->
         context.addCondition(-tokens.count { it == "&&" })
-        next(_stateGlobal)
+        next(::_stateGlobal)
     }
 
 }

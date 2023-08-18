@@ -22,11 +22,12 @@ import io.github.kevinah95.klizard_languages.CodeReader
 
 class KLizard {
     fun preprocessing(tokens: Sequence<String>, reader: CodeReader) = sequence<String> {
-        reader.preprocess(tokens)
+        if(reader.javaClass.kotlin.members.any { it.name == "preprocess"}){
+            reader.preprocess(tokens)
+        }
 
-        //tokens.filter { t -> t.all { it.isWhitespace() } || t == "\n" }
         for (token in tokens){
-            if(token.all { it.isWhitespace() } || token == "\n"){
+            if(!token.all { it.isWhitespace() } || token == "\n"){
                 yield(token)
             }
         }

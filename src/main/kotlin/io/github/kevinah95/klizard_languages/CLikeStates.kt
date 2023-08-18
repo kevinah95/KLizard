@@ -26,36 +26,33 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     var bracketStack = mutableListOf<String>()
     var _savedTokens = mutableListOf<String>()
 
-    // TODO: Add other functions
-    override var commandsByName = listOf(::_stateFunction).associateBy { it.name }
+    override var commandsByName = listOf(::_stateFunction, ::_stateDecToImp).associateBy { it.name }
 
     fun tryNewFunction(name: String) {
         context.tryNewFunction(name)
-        _state = _stateFunction
+        _state = ::_stateFunction
         if (name == "operator") {
             _state = ::_stateOperator
         }
     }
 
-    override val _stateGlobal: (token: String) -> Unit
-        get() = {token ->
-            if (token[0].isLetter() || token[0] in "_~") {
-                tryNewFunction(token)
-            }
+    override fun _stateGlobal(token: String) {
+        if (token[0].isLetter() || token[0] in "_~") {
+            tryNewFunction(token)
         }
+    }
 
-    val _stateFunction: (token: String) -> Unit = {token ->
-        if (token == "("){
+    fun _stateFunction(token: String) {
+        if (token == "(") {
             next(::_stateDec, token)
-        } else if (token == "::"){
+        } else if (token == "::") {
             context.addToFunctionName(token)
             next(::_stateNameWithSpace)
         } else if (token == "<") {
             next(::_stateTemplateInName, token)
         } else {
-            next(_stateGlobal, token)
+            next(::_stateGlobal, token)
         }
-
     }
 
     fun _stateTemplateInName(token: String) = readInsideBracketsThen("<>", "_stateFunction") {
@@ -63,7 +60,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     }
 
     fun _stateOperator(token: String) {
-        if (token != "("){
+        if (token != "(") {
             _state = ::_stateOperatorNext
         }
         context.addToFunctionName(" $token")
@@ -78,24 +75,24 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     }
 
     fun _stateNameWithSpace(token: String) {
-        _state = if(token == "operator") {
+        _state = if (token == "operator") {
             ::_stateOperator
         } else {
-            _stateFunction
+            ::_stateFunction
         }
         context.addToFunctionName(token)
     }
 
-    fun _stateDec (token: String) = readInsideBracketsThen("()", "_stateDecToImp") {
-        if (token in parameterBracketOpen){
+    fun _stateDec(token: String) = readInsideBracketsThen("()", "_stateDecToImp") {
+        if (token in parameterBracketOpen) {
             bracketStack.add(token)
-        } else if (token in parameterBracketClose){
-            if (bracketStack.isNotEmpty()){
+        } else if (token in parameterBracketClose) {
+            if (bracketStack.isNotEmpty()) {
                 bracketStack.removeLast()
             } else {
-                next(_stateGlobal)
+                next(::_stateGlobal)
             }
-        } else if (bracketStack.size == 1){
+        } else if (bracketStack.size == 1) {
             context.parameter(token)
             return
         }
@@ -103,29 +100,29 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     }
 
     fun _stateDecToImp(token: String) {
-        if (token in listOf("const", "&", "&&")){
+        if (token in listOf("const", "&", "&&")) {
             context.addToLongFunctionName(" $token")
-        } else if (token == "throw"){
+        } else if (token == "throw") {
             _state = ::_stateThrow
-        } else if (token == "throws"){
+        } else if (token == "throws") {
             _state = _stateThrows
-        } else if (token == "->"){
+        } else if (token == "->") {
             _state = _stateTrailingReturn
-        } else if (token == "noexcept"){
+        } else if (token == "noexcept") {
             _state = ::_stateNoexcept
-        } else if (token == "("){
+        } else if (token == "(") {
             val longName = context.currentFunction.longName
             tryNewFunction(longName)
             _stateFunction(token)
-        } else if (token == "{"){
+        } else if (token == "{") {
             next(::_stateEnteringImp, "{")
-        } else if (token == ":"){
+        } else if (token == ":") {
             _state = ::_stateInitializationList
-        } else if (token == "["){
+        } else if (token == "[") {
             _state = ::_stateAttribute
             _state?.invoke(token)
         } else if (!(token[0].isLetter() || token[0] == '_')) {
-            _state = _stateGlobal
+            _state = ::_stateGlobal
             _state?.invoke(token)
         } else {
             _state = ::_stateOldCParams
@@ -144,7 +141,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     }
 
     fun _stateNoexcept(token: String) {
-        if (token == "("){
+        if (token == "(") {
             _state = ::_stateThrow
         } else {
             _state = ::_stateDecToImp
@@ -160,41 +157,41 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
     fun _stateOldCParams(token: String) {
         _savedTokens.add(token)
-        if (token == ";"){
+        if (token == ";") {
             _savedTokens = mutableListOf<String>()
             _state = ::_stateDecToImp
-        } else if(token == "{"){
-            if (_savedTokens.size == 2){
+        } else if (token == "{") {
+            if (_savedTokens.size == 2) {
                 _savedTokens = mutableListOf<String>()
                 _stateDecToImp(token)
                 return
             }
 
-            _state = _stateGlobal
+            _state = ::_stateGlobal
 
-            for(tkn in _savedTokens){
+            for (tkn in _savedTokens) {
                 _state?.invoke(tkn)
             }
         } else if (token == "(") {
-            _state = _stateGlobal
-            for (tkn in _savedTokens){
+            _state = ::_stateGlobal
+            for (tkn in _savedTokens) {
                 _state?.invoke(tkn)
             }
         }
     }
 
-    fun _stateInitializationList (token: String) {
+    fun _stateInitializationList(token: String) {
         _state = _stateOneInitialization
-        if(token == "{"){
+        if (token == "{") {
             next(::_stateEnteringImp, "{")
         }
     }
 
 
     val _stateOneInitialization = readUntilThen("({") { token, tokens ->
-        if (token == "("){
+        if (token == "(") {
             _state = ::_stateInitializationValue1
-        } else{
+        } else {
             _state = ::_stateInitializationValue2
         }
         _state?.invoke(token)
@@ -204,6 +201,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     fun _stateInitializationValue1(token: String) = readInsideBracketsThen("()", null, token) {
         _state = ::_stateInitializationList
     }
+
     fun _stateInitializationValue2(token: String) = readInsideBracketsThen("{}", null, token) {
         _state = ::_stateInitializationList
     }
@@ -213,11 +211,11 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
         next(::_stateImp, token)
     }
 
-    fun _stateImp(token: String) = readInsideBracketsThen("{}", null, token){
-        _state = _stateGlobal
+    fun _stateImp(token: String) = readInsideBracketsThen("{}", null, token) {
+        _state = ::_stateGlobal
     }
 
-    fun _stateAttribute(token: String) = readInsideBracketsThen("[]", "_state_dec_to_imp", token) {
+    fun _stateAttribute(token: String) = readInsideBracketsThen("[]", "_stateDecToImp", token) {
         // pass
     }
 

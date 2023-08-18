@@ -31,12 +31,11 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     var _state: ((token: String) -> Unit)? = null
 
-    open val _stateGlobal: (token: String) -> Unit = {}
 
     open var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
 
     init {
-        savedState = _stateGlobal
+        savedState = ::_stateGlobal
     }
 
     fun statemachineClone(): CodeStateMachine {
@@ -53,6 +52,10 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
             return
         }
         next(state, token)
+    }
+
+    open fun _stateGlobal(token: String) {
+
     }
 
     fun statemachineReturn() {
@@ -117,7 +120,7 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
         if (brCount == 0 && endState != null){
             // TODO: Review this method: https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
-            next(commandsByName[endState]!!.invoke())
+            next(commandsByName[endState])
         }
     }
 }
