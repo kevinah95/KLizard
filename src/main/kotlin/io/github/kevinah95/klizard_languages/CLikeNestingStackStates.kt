@@ -23,44 +23,46 @@ import io.github.kevinah95.FileInfoBuilder
 class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     val __namespace_separators = listOf("<", ":", "final", "[", "extends", "implements")
 
+    override var commandsByName = listOf(::_stateGlobal, ::_readNamespace).associateBy { it.name }
+
     override val _stateGlobal: (token: String) -> Unit = { token ->
         if (token == "template") {
-            //_state = _template_declaration
+            _state = ::_templateDeclaration
         } else if (token == ".") {
             _state = _dot
         } else if (token in setOf("struct", "class", "namespace", "union")) {
-            _state = _dot
+            _state = _readNamespace
         } else if (token == "{") {
-
+            context._nestingStack.addBareNesting()
         } else if (token == "}") {
-
+            context._nestingStack.popNesting()
         }
     }
 
     val _dot: ((token: String) -> Unit)
         get() { return _stateGlobal }
 
-    val _readNamespace: (token: String) -> Unit = {token ->
+    val _readNamespace: (token: String) -> Unit = { token ->
         if (token == "["){
             _state = ::_readAttribute
         } else {
-            //TODO: _state = ::_readNamespaceName
+            _state = _readNamespaceName
         }
     }
 
-    //TODO: add decorator read_until_then
-    fun _readNamespaceName(token: String, saved: List<String>) {
+
+    val _readNamespaceName = readUntilThen(")({;") { token: String, saved: List<String> ->
         _state = _stateGlobal
         if (token == "{") {
             val namespace = saved.takeWhile { it in __namespace_separators }.joinToString("")
             context.addNamespace(namespace)
         }
     }
-    fun _templateDeclaration(token: String? = null) = readInsideBracketsThen("<>", "_state_global", token) {
+    fun _templateDeclaration(token: String? = null) = readInsideBracketsThen("<>", "_stateGlobal", token) {
         //do nothing
     }
 
-    fun _readAttribute(token: String) = readInsideBracketsThen("[]", "_read_namespace", null) {
+    fun _readAttribute(token: String) = readInsideBracketsThen("[]", "_readNamespace", null) {
         //do nothing
     }
 }

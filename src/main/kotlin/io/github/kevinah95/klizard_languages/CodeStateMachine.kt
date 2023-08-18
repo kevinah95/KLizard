@@ -33,7 +33,7 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     open val _stateGlobal: (token: String) -> Unit = {}
 
-    var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
+    open var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
 
     init {
         savedState = _stateGlobal
@@ -85,16 +85,23 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     // TODO: Add decorators: https://www.reddit.com/r/Kotlin/comments/7f27vb/does_kotlin_have_decorators_similar_to_python/
 
+    fun readUntilThen(tokens: String, function: (String, List<String>) -> Unit): (String) -> Unit {
+        fun decorator(func: ((String, List<String>) -> Unit)): (String) -> Unit {
+            fun readUntilThenToken(token: String): Unit {
 
-    inline fun readUntilThen(tokens: String, token:String?,  func: (String, List<String>) -> Unit) {
-
-            if(token.toString() in tokens){
-                func(token!!, rutTokens)
-                rutTokens = mutableListOf()
-            } else {
-                rutTokens.add(token!!)
+                if (token in tokens){
+                    func(token, rutTokens)
+                    rutTokens = mutableListOf()
+                } else {
+                    rutTokens.add(token)
+                }
             }
+            return ::readUntilThenToken
+        }
+        return decorator(function)
     }
+
+
 
     // TODO: See example below
     inline fun readInsideBracketsThen(brs: String, endState: String? = null, token: String? = null, func: (String)->Unit) {
@@ -113,8 +120,4 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
             next(commandsByName[endState]!!.invoke())
         }
     }
-
-//    fun _stateTemplateInName(token: String) = readInsideBracketsThen("<>", "_state_function", token){
-//        context.addToFunctionName(token)
-//    }
 }

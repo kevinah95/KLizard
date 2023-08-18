@@ -20,7 +20,6 @@ package io.github.kevinah95.klizard_languages
 
 import io.github.kevinah95.FileInfoBuilder
 
-// TODO: context is FileInfoBuilder
 abstract class CodeReader {
     open lateinit var context: FileInfoBuilder
     open var ext: MutableList<String> = mutableListOf()
@@ -65,7 +64,6 @@ abstract class CodeReader {
                 "*=", "/=", "^=", "&=", "|=", "..."
             )
 
-            // TODO: Add RegexOption.DOT_MATCHES_ALL when available for common
             val tokenPattern = Regex(
                 """(?:""" +
                         """\/\*.*?\*\/""" +
@@ -82,7 +80,7 @@ abstract class CodeReader {
                         """|\\\n""" +
                         """|\n""" +
                         """|[^\S\n]+""" +
-                        """|.)""", setOf(RegexOption.MULTILINE)
+                        """|.)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL)
             )
 
             var macro: String = ""
@@ -122,7 +120,7 @@ abstract class CodeReader {
         context = reader.context
         for (token in tokens) {
             for (state in parallelStates) {
-                //TODO: state(token)
+                state(token)
             }
             yield(token)
         }

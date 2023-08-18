@@ -32,10 +32,10 @@ interface CCppCommentsMixin {
 class CLikeReader : CodeReader(), CCppCommentsMixin {
     override lateinit var context: FileInfoBuilder
     override var ext: MutableList<String> = mutableListOf("c", "cpp", "cc", "mm", "cxx", "h", "hpp")
+
     val languageNames = listOf("cpp", "c")
 
-    // TODO: Add RegexOption.DOT_MATCHES_ALL when available for common
-    val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", RegexOption.MULTILINE)
+    val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
 
     init {
         // TODO: parallel_states
@@ -88,34 +88,24 @@ class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
     override val _stateGlobal: (token: String) -> Unit = {
         if (it == "&&") {
-            //TODO: next(_rValueRef)
+            next(_rValueRef)
         } else if (it == "typedef") {
-            //TODO: next(_typedef)
+            next(_typedef)
         }
     }
 
-
-    fun _rValueRef(token: String, tokens: List<String>) =
-        readUntilThen("=;{})", token) { token: String, tokens: List<String> ->
-            if (token == "=") {
-                context.addCondition(-1)
-            }
-            next(_stateGlobal)
+    val _rValueRef = readUntilThen("=;{})") { token: String, _: List<String> ->
+        if (token == "=") {
+            context.addCondition(-1)
         }
-
-    fun _typedef(token: String, tokens: List<String>) =
-        readUntilThen(";", token) { token: String, tokens: List<String> ->
-            context.addCondition(-tokens.count { it == "&&" })
-            next(_stateGlobal)
-        }
-
-    fun _typedef2 (token: String, tokens: List<String>) {
-        readUntilThen(";", token, ::_typedef)
+        next(_stateGlobal)
     }
 
-//    val r = readUntilThen(";", token) { token: String, tokens: List<String> ->
-//        context.addCondition(-tokens.count { it == "&&" })
-//        next(_stateGlobal)
-//    }
+
+    val _typedef = readUntilThen(";") {_: String, tokens: List<String> ->
+        context.addCondition(-tokens.count { it == "&&" })
+        next(_stateGlobal)
+    }
+
 }
 
