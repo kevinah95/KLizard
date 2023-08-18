@@ -38,9 +38,9 @@ class CLikeReader : CodeReader(), CCppCommentsMixin {
     val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
 
     init {
-        // TODO: parallel_states
-
-
+        parallelStates = listOf(CLikeStates(context),
+                                CLikeNestingStackStates(context),
+                                CppRValueRefStates(context))
     }
 
     override operator fun invoke(_context: FileInfoBuilder) {
@@ -57,7 +57,7 @@ class CLikeReader : CodeReader(), CCppCommentsMixin {
                 tilde = false
                 yield("~$token")
             } else if (!token.all { it.isWhitespace() } || token == "\n") {
-                val macro = macroPattern.matchEntire(token)
+                val macro = macroPattern.find(token)
                 if (macro != null) {
                     if (macro.groupValues[1] in listOf("if", "ifdef", "elif")) {
                         context.addCondition()
