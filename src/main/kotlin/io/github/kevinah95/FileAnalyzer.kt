@@ -40,7 +40,7 @@ class FileAnalyzer(extensions: List<(Sequence<String>, CodeReader) -> Sequence<S
 
         reader(context)
 
-        var tokens = reader.generateTokens(code)
+        var tokens = CodeReader.generateTokens(code)
 
 
         try {

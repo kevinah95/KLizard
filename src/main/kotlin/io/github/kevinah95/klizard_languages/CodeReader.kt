@@ -40,78 +40,6 @@ abstract class CodeReader {
         return compileFileExtensionRe(this.ext).matches(filename)
     }
 
-    fun generateTokens(
-        sourceCode: String,
-        addition: String = "",
-        _tokenClass: ((match: MatchResult) -> String)? = null
-    ): Sequence<String> {
-        fun createToken(match: MatchResult): String {
-            return match.groupValues[0]
-        }
-
-        var tokenClass = _tokenClass
-        if (_tokenClass == null) {
-            tokenClass = ::createToken
-        }
-
-        fun _generateTokens(source: String, add: String) = sequence {
-            val _untilEnd: String = """(?:\\\n|[^\n])*"""
-            val combined_symbols: Array<String> = arrayOf(
-                "<<=", ">>=", "||", "&&", "===", "!==",
-                "==", "!=", "<=", ">=", "->", "=>",
-                "++", "--", "+=", "-=",
-                "+", "-", "*", "/",
-                "*=", "/=", "^=", "&=", "|=", "..."
-            )
-
-            val tokenPattern = Regex(
-                """(?:""" +
-                        """\/\*.*?\*\/""" +
-                        add +
-                        """|(?:\d+\')+\d+""" +
-                        """|\w+""" +
-                        """|\"(?:\\.|[^\"\\])*\"""" +
-                        """|\'(?:\\.|[^\'\\])*?\'""" +
-                        """|\/\/""" + _untilEnd +
-                        """|\#""" +
-                        """|:=|::|\*\*""" +
-                        """|\<\s*\?(?:\s*extends\s+\w+)?\s*\>""" +
-                        """|""" + combined_symbols.map { Regex.escape(it) }.joinToString("|") +
-                        """|\\\n""" +
-                        """|\n""" +
-                        """|[^\S\n]+""" +
-                        """|.)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL)
-            )
-
-            var macro: String = ""
-
-            for (match in tokenPattern.findAll(source)) {
-                val token: String = tokenClass?.let { it(match) }.orEmpty()
-                if (macro != "") {
-                    if (token.contains("""\\\n""") || token.contains("""\n""")) {
-                        macro += token
-                    } else {
-                        yield(macro)
-                        yield(token)
-                        macro = ""
-                    }
-                } else if (token == "#") {
-                    macro = token
-                } else {
-                    yield(token)
-                }
-            }
-
-            if (macro != "") {
-                yield(macro)
-            }
-
-
-        }
-
-        return _generateTokens(sourceCode, addition)
-    }
-
     open operator fun invoke(_context: FileInfoBuilder) {
         context = _context
     }
@@ -142,6 +70,81 @@ abstract class CodeReader {
             return token.substring(2)
         }
         return null
+    }
+
+    companion object {
+        @JvmStatic
+        fun generateTokens(
+            sourceCode: String,
+            addition: String = "",
+            _tokenClass: ((match: MatchResult) -> String)? = null
+        ): Sequence<String> {
+            fun createToken(match: MatchResult): String {
+                return match.groupValues[0]
+            }
+
+            var tokenClass = _tokenClass
+            if (_tokenClass == null) {
+                tokenClass = ::createToken
+            }
+
+            fun _generateTokens(source: String, add: String) = sequence {
+                val _untilEnd: String = """(?:\\\n|[^\n])*"""
+                val combined_symbols: Array<String> = arrayOf(
+                    "<<=", ">>=", "||", "&&", "===", "!==",
+                    "==", "!=", "<=", ">=", "->", "=>",
+                    "++", "--", "+=", "-=",
+                    "+", "-", "*", "/",
+                    "*=", "/=", "^=", "&=", "|=", "..."
+                )
+
+                val tokenPattern = Regex(
+                    """(?:""" +
+                            """\/\*.*?\*\/""" +
+                            add +
+                            """|(?:\d+\')+\d+""" +
+                            """|\w+""" +
+                            """|\"(?:\\.|[^\"\\])*\"""" +
+                            """|\'(?:\\.|[^\'\\])*?\'""" +
+                            """|\/\/""" + _untilEnd +
+                            """|\#""" +
+                            """|:=|::|\*\*""" +
+                            """|\<\s*\?(?:\s*extends\s+\w+)?\s*\>""" +
+                            """|""" + combined_symbols.map { Regex.escape(it) }.joinToString("|") +
+                            """|\\\n""" +
+                            """|\n""" +
+                            """|[^\S\n]+""" +
+                            """|.)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL)
+                )
+
+                var macro = ""
+
+                for (match in tokenPattern.findAll(source)) {
+                    val token: String = tokenClass?.let { it(match) }.orEmpty()
+                    if (macro != "") {
+                        if (token.contains("""\\\n""") || token.contains("""\n""")) {
+                            macro += token
+                        } else {
+                            yield(macro)
+                            yield(token)
+                            macro = ""
+                        }
+                    } else if (token == "#") {
+                        macro = token
+                    } else {
+                        yield(token)
+                    }
+                }
+
+                if (macro != "") {
+                    yield(macro)
+                }
+
+
+            }
+
+            return _generateTokens(sourceCode, addition)
+        }
     }
 }
 
