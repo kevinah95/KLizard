@@ -38,9 +38,11 @@ class CLikeReader : CodeReader(), CCppCommentsMixin {
     val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
 
     init {
-        parallelStates = listOf(CLikeStates(context),
-                                CLikeNestingStackStates(context),
-                                CppRValueRefStates(context))
+        parallelStates = listOf(
+            CLikeStates(context),
+            CLikeNestingStackStates(context),
+            CppRValueRefStates(context)
+        )
     }
 
     override operator fun invoke(_context: FileInfoBuilder) {
@@ -102,7 +104,7 @@ class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     }
 
 
-    val _typedef = readUntilThen(";") {_: String, tokens: List<String> ->
+    val _typedef = readUntilThen(";") { _: String, tokens: List<String> ->
         context.addCondition(-tokens.count { it == "&&" })
         next(_stateGlobal)
     }

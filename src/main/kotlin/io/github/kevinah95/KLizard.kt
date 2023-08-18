@@ -91,7 +91,7 @@ class KLizard {
         }
     }
 
-    fun analyzeFile() {
+    fun analyzeFile(): FileAnalyzer {
         val extensions = listOf(
             ::preprocessing,
             ::commentCounter,
@@ -100,7 +100,7 @@ class KLizard {
             ::conditionCounter
         )
 
-        FileAnalyzer(extensions)
+        return FileAnalyzer(extensions)
     }
 
 }
