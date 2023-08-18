@@ -42,15 +42,15 @@ class FileAnalyzer(extensions: List<(Sequence<String>, CodeReader) -> Sequence<S
 
         var tokens = reader.generateTokens(code)
 
+
         try {
             for (processor in processors) {
-                tokens = processor(tokens, reader)
+                tokens = processor.invoke(tokens, reader)
             }
 
             for (unused in reader(tokens, reader)) {
                 //pass
             }
-
         } catch (e: Exception) {
             // TODO: implement RecursionError
             println("[skip] fail to process '$filename' with RecursionError - $e")

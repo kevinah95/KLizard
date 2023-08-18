@@ -29,7 +29,7 @@ interface CCppCommentsMixin {
     }
 }
 
-class CLikeReader : CodeReader(), CCppCommentsMixin {
+class CLikeReader : CodeReader() {
     override lateinit var context: FileInfoBuilder
     override var ext: MutableList<String> = mutableListOf("c", "cpp", "cc", "mm", "cxx", "h", "hpp")
 

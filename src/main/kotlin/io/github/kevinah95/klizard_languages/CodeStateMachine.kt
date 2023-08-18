@@ -54,10 +54,6 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
         next(state, token)
     }
 
-    open fun _stateGlobal(token: String) {
-
-    }
-
     fun statemachineReturn() {
         toExit = true
         statemachineBeforeReturn()
@@ -84,27 +80,9 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
         return null
     }
 
+    open fun _stateGlobal(token: String) {}
+
     fun statemachineBeforeReturn() {}
-
-    // TODO: Add decorators: https://www.reddit.com/r/Kotlin/comments/7f27vb/does_kotlin_have_decorators_similar_to_python/
-
-    fun readUntilThen(tokens: String, function: (String, List<String>) -> Unit): (String) -> Unit {
-        fun decorator(func: ((String, List<String>) -> Unit)): (String) -> Unit {
-            fun readUntilThenToken(token: String): Unit {
-
-                if (token in tokens){
-                    func(token, rutTokens)
-                    rutTokens = mutableListOf()
-                } else {
-                    rutTokens.add(token)
-                }
-            }
-            return ::readUntilThenToken
-        }
-        return decorator(function)
-    }
-
-
 
     // TODO: See example below
     inline fun readInsideBracketsThen(brs: String, endState: String? = null, token: String? = null, func: (String)->Unit) {
@@ -122,5 +100,21 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
             // TODO: Review this method: https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
             next(commandsByName[endState])
         }
+    }
+
+    fun readUntilThen(tokens: String, function: (String, List<String>) -> Unit): (String) -> Unit {
+        fun decorator(func: ((String, List<String>) -> Unit)): (String) -> Unit {
+            fun readUntilThenToken(token: String): Unit {
+
+                if (token in tokens){
+                    func(token, rutTokens)
+                    rutTokens = mutableListOf()
+                } else {
+                    rutTokens.add(token)
+                }
+            }
+            return ::readUntilThenToken
+        }
+        return decorator(function)
     }
 }

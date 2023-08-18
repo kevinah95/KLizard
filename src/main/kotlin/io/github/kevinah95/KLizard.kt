@@ -21,21 +21,17 @@ package io.github.kevinah95
 import io.github.kevinah95.klizard_languages.CodeReader
 
 class KLizard {
-    fun preprocessing(tokens: Sequence<String>, reader: CodeReader) = sequence<String> {
+    fun preprocessing(tokens: Sequence<String>, reader: CodeReader): Sequence<String> {
         if(reader.javaClass.kotlin.members.any { it.name == "preprocess"}){
-            reader.preprocess(tokens)
+            return reader.preprocess(tokens)
         }
 
-        for (token in tokens){
-            if(!token.all { it.isWhitespace() } || token == "\n"){
-                yield(token)
-            }
-        }
+        return tokens.filter { token ->  !token.all { it.isWhitespace() } || token == "\n" }
     }
 
     fun commentCounter(tokens: Sequence<String>, reader: CodeReader) = sequence<String> {
         for (token in tokens){
-            val comment: String? = null //TODO: reader.get_comment_from_token
+            val comment: String? = reader.getCommentFromToken(token)
             if (comment != null){
                 for(unused in comment.lines().drop(1)){
                     yield("\n")

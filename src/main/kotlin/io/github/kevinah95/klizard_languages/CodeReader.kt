@@ -136,6 +136,13 @@ abstract class CodeReader {
     open fun preprocess(tokens: Sequence<String>) = sequence<String> {
 
     }
+
+    open fun getCommentFromToken(token: String): String? {
+        if (token.startsWith("/*") || token.startsWith("//")) {
+            return token.substring(2)
+        }
+        return null
+    }
 }
 
 

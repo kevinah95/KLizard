@@ -21,7 +21,6 @@ package io.github.kevinah95
 class NestingStack {
     var nestingStack: MutableList<Nesting> = mutableListOf()
     var pendingFunction: FunctionInfo? = null
-    //TODO: var functionStack it is probable not necessary
 
     fun withNamespace(name: String): String {
         return (nestingStack.map { it.nameInSpace } + listOf(name)).joinToString("")
