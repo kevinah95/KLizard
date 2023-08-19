@@ -60,19 +60,23 @@ class CLikeReader : CodeReader() {
                 tilde = false
                 yield("~$token")
             } else if (!token.all { it.isWhitespace() } || token == "\n") {
-                val macro = macroPattern.find(token)
-                if (macro != null) {
-                    if (macro.groupValues[1] in listOf("if", "ifdef", "elif")) {
+                val macro = macroPattern.toPattern().matcher(token)
+                if (macro.matches()) {
+                    if (macro.group(1) in listOf("if", "ifdef", "elif")) {
                         context.addCondition()
-                    } else if (macro.groupValues[1] == "include") {
+                    } else if (macro.group(1) == "include") {
                         yield("#include")
                         try {
-                            if (macro.groupValues[2] != null) yield(macro.groupValues[2])
+                            if (macro.group(2) != null) {
+                                yield(macro.group(2))
+                            } else {
+                                yield("\"\"")
+                            }
                         } catch (_: Exception) {
                             yield("\"\"")
                         }
                         try {
-                            for (x in macro.groupValues[2].lines().drop(1)) {
+                            for (x in macro.group(2).lines().drop(1)) {
                                 yield("\n")
                             }
                         } catch (_: Exception) {
@@ -89,7 +93,7 @@ class CLikeReader : CodeReader() {
 
 class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
-    override fun _stateGlobal (token: String){
+    override fun _stateGlobal(token: String) {
         if (token == "&&") {
             next(_rValueRef)
         } else if (token == "typedef") {
