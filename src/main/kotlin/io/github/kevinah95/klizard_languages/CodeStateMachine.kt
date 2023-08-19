@@ -84,22 +84,28 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     fun statemachineBeforeReturn() {}
 
-    // TODO: See example below
-    inline fun readInsideBracketsThen(brs: String, endState: String? = null, token: String? = null, func: (String)->Unit) {
-        brCount += when (token) {
-            brs[0].toString() -> 1
-            brs[1].toString() -> -1
-            else -> 0
-        }
+    fun readInsideBracketsThen(brs: String, endState: String? = null, function: (String) -> Unit): (String) -> Unit {
+        fun decorator(func: ((String) -> Unit)): (String) -> Unit {
+            fun readUntilMatchingBrackets(token: String): Unit {
 
-        if (brCount == 0 || endState != null){
-            func(token!!)
-        }
+                brCount += when (token) {
+                    brs[0].toString() -> 1
+                    brs[1].toString() -> -1
+                    else -> 0
+                }
 
-        if (brCount == 0 && endState != null){
-            // TODO: Review this method: https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
-            next(commandsByName[endState])
+                if (brCount == 0 || endState != null) {
+                    func(token)
+                }
+
+                if (brCount == 0 && endState != null) {
+                    // TODO: Review this method: https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
+                    next(commandsByName[endState])
+                }
+            }
+            return ::readUntilMatchingBrackets
         }
+        return decorator(function)
     }
 
     fun readUntilThen(tokens: String, function: (String, List<String>) -> Unit): (String) -> Unit {

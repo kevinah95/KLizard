@@ -27,7 +27,7 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
 
     override fun _stateGlobal(token: String) {
         if (token == "template") {
-            _state = ::_templateDeclaration
+            _state = _templateDeclaration
         } else if (token == ".") {
             _state = _dot
         } else if (token in setOf("struct", "class", "namespace", "union")) {
@@ -46,7 +46,7 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
 
     fun _readNamespace(token: String) {
         if (token == "[") {
-            _state = ::_readAttribute
+            _state = _readAttribute
         } else {
             _state = _readNamespaceName
         }
@@ -61,11 +61,11 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
         }
     }
 
-    fun _templateDeclaration(token: String? = null) = readInsideBracketsThen("<>", "_stateGlobal", token) {
+    val _templateDeclaration = readInsideBracketsThen("<>", "_stateGlobal") { _ ->
         //do nothing
     }
 
-    fun _readAttribute(token: String) = readInsideBracketsThen("[]", "_readNamespace", null) {
+    val _readAttribute = readInsideBracketsThen("[]", "_readNamespace") { _ ->
         //do nothing
     }
 }
