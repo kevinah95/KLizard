@@ -89,7 +89,7 @@ abstract class CodeReader {
             }
 
             fun _generateTokens(source: String, add: String) = sequence {
-                val _untilEnd: String = """(?:\\\n|[^\n])*"""
+                val _untilEnd: String = "(?:\\\n|[^\n])*"
                 val combined_symbols: Array<String> = arrayOf(
                     "<<=", ">>=", "||", "&&", "===", "!==",
                     "==", "!=", "<=", ">=", "->", "=>",
