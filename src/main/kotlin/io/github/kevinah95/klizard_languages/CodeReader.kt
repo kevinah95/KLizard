@@ -122,7 +122,7 @@ abstract class CodeReader {
                 for (match in tokenPattern.findAll(source)) {
                     val token: String = tokenClass?.let { it(match) }.orEmpty()
                     if (macro != "") {
-                        if (token.contains("""\\\n""") || token.contains("""\n""")) {
+                        if (token.contains("\\\n") || !("\n" in token)) {
                             macro += token
                         } else {
                             yield(macro)
