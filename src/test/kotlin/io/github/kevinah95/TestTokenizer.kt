@@ -82,8 +82,8 @@ class TestGenerateToken {
 class TestGenerateTokenForMacros {
     @Test
     fun testDefine(){
-        val define = """#define xx()                    abc"""
-        val tokens = generateTokens("$define\\n                    int")
+        val define = """#define xx()                       abc"""
+        val tokens = generateTokens("$define\n                    int")
         println(tokens)
         assertEquals(listOf( define, "\n", " ".repeat(20), "int"), tokens)
     }
@@ -109,23 +109,27 @@ class TestGenerateTokenForMacros {
     //TODO: Check the slashes
     @Test
     fun testWithLineContinuerDefine(){
-        val tokens = generateTokens("""#define a \\\nb\n t""")
+        val tokens = generateTokens("#define a \\\nb\n t")
         assertTrue("t" in tokens)
     }
 
     @Test
     fun testDefine2() {
-        // TODO: testDefine2
+        val source = """ # define yyMakeArray(ptr, count, size)     { MakeArray (ptr, count, size); \
+                       yyCheckMemory (* ptr); }
+                       t
+                    """
+        val tokens = generateTokens(source)
+        assertTrue("t" in tokens)
     }
 
     @Test
     fun testHalfCommentFollowing() {
-        val comment = """#define A/*\n*/"""
+        val comment = "#define A/*\n*/"
         val tokens = generateTokens(comment)
         assertEquals(2, tokens.size)
     }
 
-    //TODO: Check slashes as in testWithLineContinuerDefine
     @Test
     fun testBlockCommentInDefine() {
         val comment = """#define A \\\n/*\\\n*/"""
@@ -144,17 +148,15 @@ class TestGenerateTokenForComments {
 
     @Test
     fun testCppStyleComment(){
-        val tokens = generateTokens("""//aaa\n""")
+        val tokens = generateTokens("//aaa\n")
         assertEquals(listOf("//aaa", "\n"), tokens)
     }
 
     //TODO: If you print this in python as "//a\\\nb" the result is newline before b, but in the example below it does not work as expected
     @Test
     fun testCppStyleCommentWithMultipleLines(){
-        val tokens = generateTokens("""//a\
-            |b
-        """.trimMargin())
-        assertEquals(listOf("""//a\\\nb"""), tokens)
+        val tokens = generateTokens("//a\\\nb")
+        assertEquals(listOf("//a\\\nb"), tokens)
     }
 
     @Test
@@ -165,7 +167,7 @@ class TestGenerateTokenForComments {
 
     @Test
     fun testWithCppComments() {
-        val tokens = generateTokens("//abc\\n t")
+        val tokens = generateTokens("//abc\n t")
         assertTrue("t" in tokens)
     }
 
