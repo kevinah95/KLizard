@@ -35,7 +35,7 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
         } else if (token == "{") {
             context._nestingStack.addBareNesting()
         } else if (token == "}") {
-            context._nestingStack.popNesting()
+            context.popNesting()
         }
     }
 
