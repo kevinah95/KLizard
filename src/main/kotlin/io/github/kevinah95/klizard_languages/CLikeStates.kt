@@ -121,10 +121,10 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             _state = ::_stateInitializationList
         } else if (token == "[") {
             _state = _stateAttribute
-            _state?.invoke(token)
+            _state(token)
         } else if (!(token[0].isLetter() || token[0] == '_')) {
             _state = ::_stateGlobal
-            _state?.invoke(token)
+            _state(token)
         } else {
             _state = ::_stateOldCParams
             _savedTokens = mutableListOf(token)
@@ -138,7 +138,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
     val _stateThrows = readUntilThen(";{") { token, _ ->
         _state = ::_stateDecToImp
-        _state?.invoke(token)
+        _state(token)
     }
 
     fun _stateNoexcept(token: String) {
@@ -148,12 +148,12 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             _state = ::_stateDecToImp
         }
 
-        _state?.invoke(token)
+        _state(token)
     }
 
     val _stateTrailingReturn = readUntilThen(";{") { token, _ ->
         _state = ::_stateDecToImp
-        _state?.invoke(token)
+        _state(token)
     }
 
     fun _stateOldCParams(token: String) {
@@ -171,12 +171,12 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             _state = ::_stateGlobal
 
             for (tkn in _savedTokens) {
-                _state?.invoke(tkn)
+                _state(tkn)
             }
         } else if (token == "(") {
             _state = ::_stateGlobal
             for (tkn in _savedTokens) {
-                _state?.invoke(tkn)
+                _state(tkn)
             }
         }
     }
@@ -195,7 +195,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
         } else {
             _state = _stateInitializationValue2
         }
-        _state?.invoke(token)
+        _state(token)
     }
 
 
@@ -219,6 +219,4 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     val _stateAttribute = readInsideBracketsThen("[]", "_stateDecToImp") {_ ->
         // pass
     }
-
-
 }

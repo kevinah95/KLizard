@@ -29,7 +29,7 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
     var rutTokens: MutableList<String> = mutableListOf()
     var brCount: Int = 0
 
-    var _state: ((token: String) -> Unit)? = null
+    var _state: ((token: String) -> Unit) = ::_stateGlobal
 
 
     open var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
@@ -42,12 +42,12 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
         return CodeStateMachine(this.context)
     }
 
-    fun next(state: ((token: String) -> Unit)? = null, token: String? = null): Boolean? {
+    fun next(state: ((token: String) -> Unit), token: String? = null): Boolean? {
         _state = state
-        return token?.let { CodeStateMachine(context)(it) }
+        return token?.let { this(it) }
     }
 
-    fun nextIf(state: ((token: String) -> Unit)? = null, token: String, expected: String) {
+    fun nextIf(state: ((token: String) -> Unit), token: String, expected: String) {
         if (token != expected) {
             return
         }
@@ -59,14 +59,15 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
         statemachineBeforeReturn()
     }
 
-    fun subState(state: ((token: String) -> Unit)? = null, callback: (() -> Unit)? = null, token: String? = null) {
-        savedState = _state!!
+    fun subState(state: ((token: String) -> Unit), callback: (() -> Unit)? = null, token: String? = null) {
+        savedState = _state
         this.callback = callback
         next(state, token)
     }
 
     operator fun invoke(token: String, reader: CodeReader? = null): Boolean? {
-        if (_state?.invoke(token) != null) {
+        //TODO: Check this != null
+        if (_state(token) != null) {
             next(savedState)
             if (callback != null) {
                 callback?.let { it() }
@@ -100,7 +101,7 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
                 if (brCount == 0 && endState != null) {
                     // TODO: Review this method: https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
-                    next(commandsByName[endState])
+                    commandsByName[endState]?.let { next(it) }
                 }
             }
             return ::readUntilMatchingBrackets
