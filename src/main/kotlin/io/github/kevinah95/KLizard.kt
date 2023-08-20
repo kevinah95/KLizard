@@ -88,16 +88,21 @@ class KLizard {
         }
     }
 
-    fun analyzeFile(): FileAnalyzer {
-        val extensions = listOf(
+    fun getExtensions(extensionNames: List<Any>): MutableList<(Sequence<String>, CodeReader) -> Sequence<String>> {
+        fun expandExtensions(existing: MutableList<(tokens: Sequence<String>, reader: CodeReader) -> Sequence<String>>): MutableList<(Sequence<String>, CodeReader) -> Sequence<String>> {
+            //TODO: implement expand_extensions
+            return existing
+        }
+        return expandExtensions(mutableListOf(
             ::preprocessing,
             ::commentCounter,
             ::lineCounter,
             ::tokenCounter,
             ::conditionCounter
-        )
-
-        return FileAnalyzer(extensions)
+        ))
     }
+
+    val  analyzeFile: FileAnalyzer = FileAnalyzer(getExtensions(mutableListOf()))
+
 
 }

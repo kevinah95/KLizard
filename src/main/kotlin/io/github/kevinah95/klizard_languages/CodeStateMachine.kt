@@ -35,7 +35,8 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
     open var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
 
     init {
-        savedState = ::_stateGlobal
+        savedState = _state
+
     }
 
     fun statemachineClone(): CodeStateMachine {
@@ -67,12 +68,13 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     operator fun invoke(token: String, reader: CodeReader? = null): Boolean? {
         //TODO: Check this != null
-        if (_state(token) != null) {
-            next(savedState)
-            if (callback != null) {
-                callback?.let { it() }
-            }
-        }
+//        if (_state(token) != null) {
+//            next(savedState)
+//            if (callback != null) {
+//                callback?.let { it() }
+//            }
+//        }
+        _state(token)
         lastToken = token
         if (toExit) {
             return true
