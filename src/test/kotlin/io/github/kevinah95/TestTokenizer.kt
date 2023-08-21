@@ -106,7 +106,6 @@ class TestGenerateTokenForMacros {
         assertEquals(listOf("#ifdef abc", "\n"), tokens)
     }
 
-    //TODO: Check the slashes
     @Test
     fun testWithLineContinuerDefine(){
         val tokens = generateTokens("#define a \\\nb\n t")
