@@ -19,6 +19,7 @@
 package io.github.kevinah95
 
 import io.github.kevinah95.klizard_languages.CodeReader
+import io.github.kevinah95.lizard_ext.ExtensionBase
 
 class KLizard {
     fun preprocessing(tokens: Sequence<String>, reader: CodeReader): Sequence<String> {
@@ -90,7 +91,11 @@ class KLizard {
 
     fun getExtensions(extensionNames: List<Any>): MutableList<(Sequence<String>, CodeReader) -> Sequence<String>> {
         fun expandExtensions(existing: MutableList<(tokens: Sequence<String>, reader: CodeReader) -> Sequence<String>>): MutableList<(Sequence<String>, CodeReader) -> Sequence<String>> {
-            //TODO: implement expand_extensions
+            for (name in extensionNames) {
+                if (name is ExtensionBase) {
+                    existing.add((name)::invoke)
+                }
+            }
             return existing
         }
         return expandExtensions(mutableListOf(

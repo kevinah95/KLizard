@@ -22,6 +22,14 @@ fun getCppFileinfo(sourceCode: String): FileInformation {
     return KLizard().analyzeFile.analyzeSourceCode("a.cpp", sourceCode)
 }
 
+fun getCppFileinfoWithExtension(sourceCode: String, extension: Any): FileInformation {
+    return FileAnalyzer(KLizard().getExtensions(listOf(extension))).analyzeSourceCode("a.cpp", sourceCode)
+}
+
+fun getCppFunctionListWithExtension(sourceCode: String, extension: Any): MutableList<FunctionInfo> {
+    return getCppFileinfoWithExtension(sourceCode, extension).functionList
+}
+
 fun getCppFunctionList(sourceCode: String): MutableList<FunctionInfo> {
     return getCppFileinfo(sourceCode).functionList
 }

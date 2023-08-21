@@ -20,7 +20,8 @@ package io.github.kevinah95.klizard_languages
 
 import io.github.kevinah95.FileInfoBuilder
 
-open class CodeStateMachine(val context: FileInfoBuilder) {
+open class CodeStateMachine {
+    lateinit var context: FileInfoBuilder
     var savedState: (token: String) -> Unit
 
     var lastToken: String? = null
@@ -34,9 +35,14 @@ open class CodeStateMachine(val context: FileInfoBuilder) {
 
     open var commandsByName = listOf(::_stateGlobal).associateBy { it.name }
 
+    constructor() {}
+
+    constructor(context: FileInfoBuilder) {
+        this.context = context
+    }
+
     init {
         savedState = _state
-
     }
 
     fun statemachineClone(): CodeStateMachine {
