@@ -238,4 +238,51 @@ class TestCCppLizard {
         assertEquals("d", result[1].name)
     }
 
+    @Test
+    fun testOneMacroInClass() {
+        var result = getCppFunctionList("class c {M()}; int d(){}")
+        assertEquals(1, result.size)
+        assertEquals("d", result[0].name)
+    }
+
+    @Test
+    fun testPreClass() {
+        var result = getCppFunctionList("class c; int d(){}")
+        assertEquals(1, result.size)
+        assertEquals("d", result[0].name)
+    }
+
+    @Test
+    fun testClassWithInheritance() {
+        var result = getCppFunctionList("class c final:public b {int f(){}};")
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+    }
+
+    @Test
+    fun testNestedClass() {
+        var result = getCppFunctionList("class c {class d {int f(){}};};")
+        assertEquals(1, result.size)
+        assertEquals("c::d::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateClass() {
+        var result = getCppFunctionList("template<typename T> class c {};")
+        assertEquals(0, result.size)
+        result = getCppFunctionList("template<class T> class c {};")
+        assertEquals(0, result.size)
+        result = getCppFunctionList("template<typename T> class c {" +
+            "void f(T t) {}};")
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList("template<class T, typename S>" +
+                "class c {void f(T t) {}};")
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList("namespace ns { template<class T>" +
+                "class c {void f(T t) {}}; }")
+        assertEquals(1, result.size)
+        assertEquals("ns::c::f", result[0].name)
+    }
 }
