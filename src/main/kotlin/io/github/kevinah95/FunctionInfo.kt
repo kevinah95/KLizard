@@ -55,10 +55,9 @@ class FunctionInfo (var name: String, var filename: String, var startLine: Int =
     val parameterCount: Int
         get() = fullParameters.size
 
-    // TODO: Verify this.
     val parameters : List<String>
         get() {
-            val matches = fullParameters.map { Regex("""(\w+)(\s=.*)?${'$'}""").matchEntire(it) }
+            val matches = fullParameters.map { Regex("""(\w+)(\s=.*)?${'$'}""").find(it) }
             return matches.filterNotNull().map { it.groupValues[1] }
         }
 
