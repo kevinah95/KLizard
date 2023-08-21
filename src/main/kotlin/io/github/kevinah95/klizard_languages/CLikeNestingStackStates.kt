@@ -56,7 +56,7 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
     val _readNamespaceName = readUntilThen(")({;") { token: String, saved: List<String> ->
         _state = ::_stateGlobal
         if (token == "{") {
-            val namespace = saved.takeWhile { it in __namespace_separators }.joinToString("")
+            val namespace = saved.takeWhile { it !in __namespace_separators }.joinToString("")
             context.addNamespace(namespace)
         }
     }
