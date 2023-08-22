@@ -49,13 +49,13 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
             context.addToFunctionName(token)
             next(::_stateNameWithSpace)
         } else if (token == "<") {
-            next(::_stateTemplateInName, token)
+            next(_stateTemplateInName, token)
         } else {
             next(::_stateGlobal, token)
         }
     }
 
-    fun _stateTemplateInName(token: String) = readInsideBracketsThen("<>", "_stateFunction") {
+    val _stateTemplateInName = readInsideBracketsThen("<>", "_stateFunction") {token ->
         context.addToFunctionName(token)
     }
 
