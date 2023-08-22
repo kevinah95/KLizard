@@ -34,7 +34,7 @@ abstract class CodeReader {
 
     fun matchFilename(filename: String): Boolean {
         fun compileFileExtensionRe(exts: List<String>): Regex {
-            return Regex(""".*\.(${exts.joinToString("|")})$""", RegexOption.IGNORE_CASE)
+            return Regex(""".*\.(${exts.joinToString("|")})${'$'}""", RegexOption.IGNORE_CASE)
         }
 
         return compileFileExtensionRe(this.ext).matches(filename)
