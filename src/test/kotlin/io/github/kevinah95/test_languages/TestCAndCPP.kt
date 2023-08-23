@@ -562,7 +562,7 @@ class TestCCppLizard {
     fun testNamespaceAlias() {
         val result = getCppFunctionList(
             "namespace p;" +
-            "namespace real { bool foo() {} }"
+                    "namespace real { bool foo() {} }"
         )
         assertEquals(1, result.size)
         assertEquals("real::foo", result[0].name)
@@ -779,4 +779,163 @@ class TestCCppLizard {
         assertEquals(1, result.size)
         assertEquals("A::foo", result[0].name)
     }
+}
+
+class TestPreprocessing {
+    @Test
+    fun testContentMacroShouldBeIgnored() {
+        val result = getCppFunctionList(
+            """
+
+                    #define MTP_CHEC                    \
+                       int foo () {                     \
+                        }
+               
+                       """
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testPreprocessorsShouldBeIgnoredOutsideFunctionImplementation() {
+        val result = getCppFunctionList(
+            """
+              #ifdef MAGIC
+              #endif
+              void foo()
+              {}""".trimIndent()
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testPreprocessorIsNotFunction() {
+        val result = getCppFunctionList(
+            """
+              #ifdef A
+              #elif (defined E)
+              #endif""".trimIndent()
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testBodyWithFunctionLike() {
+        val result = getCppFunctionList("int a() { xws (a) if(){} }")
+        assertEquals(1, result.size)
+        assertEquals("a", result[0].name)
+    }
+
+    @Test
+    fun testBodyWithMacroCallAfterIf() {
+        val result = getCppFunctionList("int a() { if (a) b(){} }")
+        assertEquals(1, result.size)
+        assertEquals("a", result[0].name)
+    }
+
+    @Test
+    fun testBodyWithMacroCallAfterIfAndNoSemicolonBeforeTheClosingBr() {
+        val result = getCppFunctionList("int a() { if (a) b() } int c(){}")
+        assertEquals(2, result.size)
+        assertEquals("c", result[1].name)
+    }
+
+    @Test
+    fun testBodyWithMacroCallAfterIfAndNoSemicolonBeforeTheClosingBr2() {
+        val result = getCppFunctionList("int a() { if (a) if(x) b() } int c(){}")
+        assertEquals(2, result.size)
+        assertEquals("c", result[1].name)
+    }
+
+    @Test
+    fun testBodyWithMacroAndClass() {
+        val result = getCppFunctionList("class A{int a() { if (a) if(x) b() } int c(){}}")
+        assertEquals(2, result.size)
+        assertEquals("A::c", result[1].name)
+    }
+
+    @Test
+    fun testBodyWithFunctionLike2() {
+        val result = getCppFunctionList(
+            """
+                void myFunction()
+                {
+                  IGNORE_FLAGS("w-maybe")
+                  if(2+2==4)
+                  END_IGNORE_FLAGS("w-maybe")
+                  {
+                    mySecondFunction()
+                  }
+                }
+
+                int mySecondFunction()
+                {
+                  return 2;
+                }
+            """.trimIndent()
+        )
+        assertEquals(2, result.size)
+        assertEquals("mySecondFunction", result[1].name)
+    }
+}
+
+class Test_Big {
+    @Test
+    fun testTrouble() {
+        val result = getCppFunctionList("foo<y () >> 5> r;")
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testTypedef() {
+        val code = """
+        typedef struct tagAAA
+        {
+        }AAA;
+
+        int func_a(int size)
+        {
+            if(ccc && eee)
+            {
+                return 1;
+            }
+        }
+        """.trimIndent()
+        val result = getCppFunctionList(code)
+        assertEquals(1, result.size)
+        assertEquals(3, result[0].cyclomaticComplexity)
+    }
+}
+
+class Test_Dialects {
+    @Test
+    fun testCudaKernelLaunch() {
+        var code = """
+            void foo() {
+                kernel <<< gridDim, blockDim, 0 >>> (d_data, height, width);
+            }
+        """.trimIndent()
+        var result = getCppFunctionList(code)
+        assertEquals(1, result.size)
+        assertEquals("foo", result[0].name)
+        assertEquals(1, result[0].cyclomaticComplexity)
+        code = """
+            void foo() {
+                kernel <<< gridDim, blockDim, (bar ? 0 : 1) >>> (x, y, z);
+            }
+        """.trimIndent()
+        result = getCppFunctionList(code)
+        assertEquals(1, result.size)
+        assertEquals(2, result[0].cyclomaticComplexity)
+        code = """
+            void foo() {
+                kernel <<< gridDim, blockDim, 0 >>> (x, y, (bar ? w : z));
+            }
+        """.trimIndent()
+        result = getCppFunctionList(code)
+        assertEquals(1, result.size)
+        assertEquals(2, result[0].cyclomaticComplexity)
+    }
+
+
 }
