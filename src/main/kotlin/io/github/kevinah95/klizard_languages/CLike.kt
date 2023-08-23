@@ -29,11 +29,11 @@ interface CCppCommentsMixin {
     }
 }
 
-class CLikeReader : CodeReader() {
+open class CLikeReader : CodeReader() {
     override lateinit var context: FileInfoBuilder
     override var ext: MutableList<String> = mutableListOf("c", "cpp", "cc", "mm", "cxx", "h", "hpp")
 
-    val languageNames = listOf("cpp", "c")
+    open val languageNames = listOf("cpp", "c")
 
     val macroPattern = Regex("""#\s*(\w+)\s*(.*)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL))
 

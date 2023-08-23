@@ -24,13 +24,10 @@ abstract class CodeReader {
     open lateinit var context: FileInfoBuilder
     open var ext: MutableList<String> = mutableListOf()
     var extraSubclasses: Set<String> = setOf()
-    var _conditions: Set<String> = setOf("if", "for", "while", "&&", "||", "?", "catch", "case")
+    open var _conditions: Set<String> = setOf("if", "for", "while", "&&", "||", "?", "catch", "case")
     var parallelStates: List<CodeStateMachine> = listOf()
-    var conditions: Set<String>
+    open var conditions: Set<String> = _conditions
 
-    init {
-        conditions = _conditions.toSet() // make a copy
-    }
 
     fun matchFilename(filename: String): Boolean {
         fun compileFileExtensionRe(exts: List<String>): Regex {
@@ -72,8 +69,80 @@ abstract class CodeReader {
         return null
     }
 
+
+    open fun generateTokens(
+        sourceCode: String,
+        addition: String = "",
+        _tokenClass: ((match: MatchResult) -> String)? = null
+    ): Sequence<String> {
+        fun createToken(match: MatchResult): String {
+            return match.groupValues[0]
+        }
+
+        var tokenClass = _tokenClass
+        if (_tokenClass == null) {
+            tokenClass = ::createToken
+        }
+
+        fun _generateTokens(source: String, add: String) = sequence {
+            val _untilEnd: String = """(?:\\\n|[^\n])*"""
+            val combined_symbols: Array<String> = arrayOf(
+                "<<=", ">>=", "||", "&&", "===", "!==",
+                "==", "!=", "<=", ">=", "->", "=>",
+                "++", "--", "+=", "-=",
+                "+", "-", "*", "/",
+                "*=", "/=", "^=", "&=", "|=", "..."
+            )
+
+            val tokenPattern = Regex(
+                """(?:""" +
+                        """\/\*.*?\*\/""" +
+                        add +
+                        """|(?:\d+\')+\d+""" +
+                        """|\w+""" +
+                        """|\"(?:\\.|[^\"\\])*\"""" +
+                        """|\'(?:\\.|[^\'\\])*?\'""" +
+                        """|\/\/""" + _untilEnd +
+                        """|\#""" +
+                        """|:=|::|\*\*""" +
+                        """|\<\s*\?(?:\s*extends\s+\w+)?\s*\>""" +
+                        """|""" + combined_symbols.map { Regex.escape(it) }.joinToString("|") +
+                        """|\\\n""" +
+                        """|\n""" +
+                        """|[^\S\n]+""" +
+                        """|.)""", setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL)
+            )
+
+            var macro = ""
+
+            for (match in tokenPattern.findAll(source)) {
+                val token: String = tokenClass?.let { it(match) }.orEmpty()
+                if (macro != "") {
+                    if (token.contains("\\\n") || !("\n" in token)) {
+                        macro += token
+                    } else {
+                        yield(macro)
+                        yield(token)
+                        macro = ""
+                    }
+                } else if (token == "#") {
+                    macro = token
+                } else {
+                    yield(token)
+                }
+            }
+
+            if (macro != "") {
+                yield(macro)
+            }
+
+
+        }
+
+        return _generateTokens(sourceCode, addition)
+    }
+
     companion object {
-        @JvmStatic
         fun generateTokens(
             sourceCode: String,
             addition: String = "",

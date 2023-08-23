@@ -18,21 +18,26 @@
 
 package io.github.kevinah95.klizard_languages
 
+class CSharpReader : CLikeReader() {
+    override var ext: MutableList<String> = mutableListOf("cs")
 
-fun languages(): List<CodeReader> {
+    override val languageNames: List<String> = listOf("csharp")
 
-    return listOf<CodeReader>(
-        CLikeReader(),
-        CSharpReader()
-    )
-}
+    override var _conditions: Set<String> = setOf("if", "for", "while", "&&", "||", "?", "catch", "case", "??")
 
+    override var conditions: Set<String> = _conditions.toSet()
 
-fun getReaderFor(filename: String): CodeReader? {
-    for (lan in languages()){
-        if (lan.matchFilename(filename)){
-            return lan
-        }
+    init {
+        conditions = _conditions.toSet() // make a copy
     }
-    return null
+
+
+        override fun generateTokens(
+            sourceCode: String,
+            addition: String,
+            tokenClass: ((match: MatchResult) -> String)?
+        ): Sequence<String> {
+            return super.generateTokens(sourceCode, """|(?:\?\?)""", tokenClass)
+        }
+
 }
