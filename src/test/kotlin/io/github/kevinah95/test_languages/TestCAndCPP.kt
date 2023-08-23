@@ -272,17 +272,511 @@ class TestCCppLizard {
         assertEquals(0, result.size)
         result = getCppFunctionList("template<class T> class c {};")
         assertEquals(0, result.size)
-        result = getCppFunctionList("template<typename T> class c {" +
-            "void f(T t) {}};")
+        result = getCppFunctionList(
+            "template<typename T> class c {" +
+                    "void f(T t) {}};"
+        )
         assertEquals(1, result.size)
         assertEquals("c::f", result[0].name)
-        result = getCppFunctionList("template<class T, typename S>" +
-                "class c {void f(T t) {}};")
+        result = getCppFunctionList(
+            "template<class T, typename S>" +
+                    "class c {void f(T t) {}};"
+        )
         assertEquals(1, result.size)
         assertEquals("c::f", result[0].name)
-        result = getCppFunctionList("namespace ns { template<class T>" +
-                "class c {void f(T t) {}}; }")
+        result = getCppFunctionList(
+            "namespace ns { template<class T>" +
+                    "class c {void f(T t) {}}; }"
+        )
         assertEquals(1, result.size)
         assertEquals("ns::c::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateClassFullSpecialization() {
+        var result = getCppFunctionList("template<> class c<double> {};")
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "template<> class c<double> {" +
+                    "void f() {}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "template<>" +
+                    "class c<double, int> {void f() {}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "namespace ns { template<>" +
+                    "class c<double> {void f() {}}; }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("ns::c::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateClassPartialSpecialization() {
+        var result = getCppFunctionList("template<typename T> class c<int,T> {};")
+        assertEquals(0, result.size)
+        result = getCppFunctionList("template<class T> class c<int,T> {};")
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "template<typename T> class c<int,T> {" +
+                    "void f(T t) {}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "template<class T> class c<int,T> {" +
+                    "void f(T t) {}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "template<class T, typename S>" +
+                    "class c<int,T,S> {void f(T t) {}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "namespace ns { template<class T>" +
+                    "class c<int,T> {void f(T t) {}}; }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("ns::c::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateFunction() {
+        var result = getCppFunctionList("template<typename T> void f(T t) {}")
+        assertEquals(1, result.size)
+        assertEquals("f", result[0].name)
+        result = getCppFunctionList("template<class T> void f(T t) {}")
+        assertEquals(1, result.size)
+        assertEquals("f", result[0].name)
+        result = getCppFunctionList(
+            "namespace ns {" +
+                    "template<class T> void f(T t) {}}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("ns::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateFunctionSpecialization() {
+        var result = getCppFunctionList("template<> void f<double>() {}")
+        assertEquals(1, result.size)
+        assertEquals("f<double>", result[0].name)
+        result = getCppFunctionList(
+            "namespace ns {" +
+                    "template<> void f<double>() {}}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("ns::f<double>", result[0].name)
+    }
+
+    @Test
+    fun testNestedTemplateFunction() {
+        var result = getCppFunctionList(
+            "template<typename T> class c { " +
+                    "template<typename S> void f() {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "template<class T> class c { " +
+                    "template<class S> void f() {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+        result = getCppFunctionList(
+            "namespace ns { " +
+                    "template<class T> class c { " +
+                    "template<class S> void f() {} }; }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("ns::c::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplatedCodeWithQuestionMark() {
+        val result = getCppFunctionList(
+            "void a(){Class<?>[];}"
+        )
+        assertEquals(1, result[0].cyclomaticComplexity)
+    }
+
+    @Test
+    fun testClassAsAnAttribute() {
+        val result = getCppFunctionList(
+            "void a(){{String.class}}"
+        )
+        assertEquals(1, result[0].cyclomaticComplexity)
+    }
+
+    @Test
+    fun test1() {
+        val result = getCppFunctionList(
+            "class c {{}}"
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testBracketThatIsNotANamespace() {
+        val result = getCppFunctionList(
+            "class c { {};int f(){}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+    }
+
+    @Test
+    fun testNestedClassMiddle() {
+        val result = getCppFunctionList(
+            "class c {class d {};int f(){}};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("c::f", result[0].name)
+    }
+
+    @Test
+    fun testTemplateAsReference() {
+        val result = getCppFunctionList(
+            "abc::def(a<b>& c){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testLessThenIsNotTemplate() {
+        val result = getCppFunctionList(
+            "def(<); foo(){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testTemplateWithPointer() {
+        val result = getCppFunctionList(
+            "abc::def (a<b*> c){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testNestedTemplate() {
+        val result = getCppFunctionList(
+            "abc::def (a<b<c>> c){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testDoubleNestedTemplate() {
+        val result = getCppFunctionList(
+            "abc::def (a<b<c<d>>> c){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testTemplateWithReference() {
+        val result = getCppFunctionList(
+            "void fun(t<int &>b){} "
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testTemplateWithReferenceAsReference() {
+        val result = getCppFunctionList(
+            "void fun(t<const int&>&b){} "
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testTemplateAsPartOfFunctionName() {
+        val result = getCppFunctionList(
+            "void fun<a,b<c>>(){} "
+        )
+        assertEquals("fun<a,b<c>>", result[0].name)
+    }
+
+
+    @Test
+    fun testOperatorOverloading() {
+        val result = getCppFunctionList(
+            "bool operator +=(int b){}"
+        )
+        assertEquals("operator +=", result[0].name)
+    }
+
+    @Test
+    fun testOperatorOverloadingShift() {
+        val result = getCppFunctionList(
+            "bool operator <<(int b){}"
+        )
+        assertEquals("operator < <", result[0].name)
+    }
+
+    @Test
+    fun testOperatorWithComplicatedName() {
+        val result = getCppFunctionList(
+            "operator MyStruct&(){}"
+        )
+        assertEquals("operator MyStruct &", result[0].name)
+    }
+
+    @Test
+    fun testOperatorOverloadingWithNamespace() {
+        val result = getCppFunctionList(
+            "bool TC::operator !(int b){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("TC::operator !", result[0].name)
+    }
+
+    @Test
+    fun testFunctionOperator() {
+        val result = getCppFunctionList(
+            "bool TC::operator ()(int b){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("TC::operator ( )", result[0].name)
+    }
+
+    @Test
+    fun testInlineOperator() {
+        val result = getCppFunctionList(
+            "class A { bool operator ()(int b) {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::operator ( )", result[0].name)
+    }
+
+    @Test
+    fun testNamespaceAlias() {
+        val result = getCppFunctionList(
+            "namespace p;" +
+            "namespace real { bool foo() {} }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("real::foo", result[0].name)
+    }
+
+    @Test
+    fun testNestedUnnamedNamespace() {
+        val result = getCppFunctionList(
+            "namespace real { namespace { bool foo() {} } }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("real::foo", result[0].name)
+    }
+
+    @Test
+    fun testConstructorInitializationList() {
+        val result = getCppFunctionList(
+            "A::A():a(1){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::A", result[0].name)
+    }
+
+    @Test
+    fun testConstructorInitializationListNoexcept() {
+        val result = getCppFunctionList(
+            "A::A()noexcept:a(1){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::A", result[0].name)
+    }
+
+    @Test
+    fun testConstructorInitializerList() {
+        val result = getCppFunctionList(
+            "A::A():a({1}),value(true){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::A", result[0].name)
+    }
+
+    @Test
+    fun testConstructorUniformInitialization() {
+        val result = getCppFunctionList(
+            "A::A():a{1}{}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::A", result[0].name)
+    }
+
+    @Test
+    fun testParenthesesBeforeFunction() {
+        val result = getCppFunctionList(
+            "()"
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testDestructorImplementation() {
+        val result = getCppFunctionList(
+            "A::~A(){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::~A", result[0].name)
+    }
+
+    @Test
+    fun testFunctionThatReturnsFunctionPointers() {
+        val result = getCppFunctionList(
+            "int (*fun())(){}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("int( * fun())", result[0].name)
+    }
+
+    @Test
+    fun testStructInReturnType() {
+        val result = getCppFunctionList(
+            " struct a b() { a(1>2); }"
+        )
+        assertEquals(1, result.size)
+        assertEquals("b", result[0].name)
+    }
+
+    @Test
+    fun testFunctionNameClass() {
+        val result = getCppFunctionList(
+            "int class(){};"
+        )
+        assertEquals(1, result.size)
+        assertEquals("class", result[0].name)
+    }
+
+    @Test
+    fun testUnderscore() {
+        val result = getCppFunctionList(
+            " a() _() { }"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testGlobalVarConstructor() {
+        var result = getCppFunctionList(
+            "std::string s(\"String\");"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "std::string s = \"String\";"
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testNonFunctionInitializerList() {
+        var result = getCppFunctionList(
+            "v={}"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "v = {};"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "std::vector<int> v = {1, 2, 3};"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "v = {1, 2, 3};"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "namespace n { v = {}; }"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "class n { int v = {0}; }"
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testNonFunctionUniformInitialization() {
+        var result = getCppFunctionList(
+            "std::vector<int> v{1, 2, 3};"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "std::vector<int> v{};"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "namespace n { int v{0}; }"
+        )
+        assertEquals(0, result.size)
+        result = getCppFunctionList(
+            "class n { int v{0}; }"
+        )
+        assertEquals(0, result.size)
+    }
+
+    @Test
+    fun testStructInParam() {
+        val result = getCppFunctionList(
+            "int fun(struct a){}"
+        )
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testTrailingReturnType() {
+        var result = getCppFunctionList(
+            "auto foo() -> void {}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("foo", result[0].name)
+        result = getCppFunctionList(
+            "auto foo(int a) -> decltype(a) {}"
+        )
+        assertEquals(1, result.size)
+        assertEquals("foo", result[0].name)
+    }
+
+    @Test
+    fun testRefQualifiers() {
+        var result = getCppFunctionList(
+            "struct A { void foo() & {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::foo", result[0].name)
+        result = getCppFunctionList(
+            "struct A { void foo() const & {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::foo", result[0].name)
+        result = getCppFunctionList(
+            "struct A { void foo() && {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::foo", result[0].name)
+        result = getCppFunctionList(
+            "struct A { void foo() const && {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::foo", result[0].name)
+    }
+
+    @Test
+    fun testUnionAsQualifier() {
+        val result = getCppFunctionList(
+            "union A { void foo() {} };"
+        )
+        assertEquals(1, result.size)
+        assertEquals("A::foo", result[0].name)
     }
 }
