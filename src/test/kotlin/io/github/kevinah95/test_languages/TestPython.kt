@@ -52,11 +52,33 @@ class testParserForPython {
     @Test
     fun testSimplePythonFunction() {
         val sourceCode = """
-            |    def simple_function():
-            |        pass
+            class namespace1:
+                def simple_function():
+                    if IamOnEarth:
+                        return toMars()
         """.trimMargin()
 
         val functions = getPythonFunctionList(sourceCode)
         assertEquals(1, functions.size)
+        assertEquals("simple_function", functions[0].name)
+        assertEquals(2, functions[0].cyclomaticComplexity)
+        //TODO: test when max_nesting_depth is implemeted
+        assertEquals(4, functions[0].endLine)
+        assertEquals("simple_function( )", functions[0].longName)
+    }
+
+    @Test
+    fun testTwoSimplePythonFunction() {
+        val sourceCode = """
+            def foo():
+                #'
+                return False
+
+            def bar():
+                if foo == 'bar':
+                    return True
+                """.trimIndent()
+        val functions = getPythonFunctionList(sourceCode)
+        assertEquals(2, functions.size)
     }
 }

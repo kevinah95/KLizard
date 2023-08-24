@@ -37,7 +37,7 @@ class ScriptLanguageMixIn {
 
     companion object {
         fun generateCommonTokens(sourceCode: String, addition: String = "", matchHolder: ((match: MatchResult) -> String)? = null): Sequence<String>{
-            val _untilEnd = "(?:\\\n|[^\n])*"
+            val _untilEnd = """(?:\\\n|[^\n])*"""
             return CodeReader.generateTokens(
                 sourceCode,
                 "|#"+_untilEnd + addition,
