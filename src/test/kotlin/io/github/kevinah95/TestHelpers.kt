@@ -30,6 +30,10 @@ fun getCppFunctionListWithExtension(sourceCode: String, extension: Any): Mutable
     return getCppFileinfoWithExtension(sourceCode, extension).functionList
 }
 
+fun getPythonFunctionListWithExtension(sourceCode: String, extension: Any): MutableList<FunctionInfo> {
+    return FileAnalyzer(KLizard().getExtensions(listOf(extension))).analyzeSourceCode("a.py", sourceCode).functionList
+}
+
 fun getCppFunctionList(sourceCode: String): MutableList<FunctionInfo> {
     return getCppFileinfo(sourceCode).functionList
 }

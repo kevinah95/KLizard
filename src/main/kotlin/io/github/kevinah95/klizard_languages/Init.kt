@@ -23,7 +23,8 @@ fun languages(): List<CodeReader> {
 
     return listOf<CodeReader>(
         CLikeReader(),
-        CSharpReader()
+        CSharpReader(),
+        PythonReader()
     )
 }
 
