@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.0'
     id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'io.github.kevinah95'
@@ -22,4 +23,12 @@ test {
 
 kotlin {
     jvmToolchain(8)
+}
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            from components.java
+        }
+    }
 }
