@@ -103,7 +103,7 @@ class PythonReader() : CodeReader() {
         var readingLeadingSpace = true
 
         for (token in tokens) {
-            if (token != "\\n") {
+            if (token != "\n") {
                 if (readingLeadingSpace) {
                     if (token.all { it.isWhitespace() }) {
                         currentLeadingSpaces += countSpaces(token)
@@ -122,7 +122,7 @@ class PythonReader() : CodeReader() {
                 currentLeadingSpaces = 0
             }
 
-            if (!token.all { it.isWhitespace() } || token == "\\n"){
+            if (!token.all { it.isWhitespace() } || token == "\n"){
                 yield(token)
             }
         }
