@@ -32,12 +32,12 @@ class CSharpReader : CLikeReader() {
     }
 
 
-        override fun generateTokens(
-            sourceCode: String,
-            addition: String,
-            tokenClass: ((match: MatchResult) -> String)?
-        ): Sequence<String> {
-            return super.generateTokens(sourceCode, """|(?:\?\?)""", tokenClass)
-        }
+    override fun generateTokens(
+        sourceCode: String,
+        addition: String,
+        tokenClass: ((match: MatchResult) -> String)?
+    ): Sequence<String> {
+        return super.generateTokens(sourceCode, """|(?:\?\?)""", tokenClass)
+    }
 
 }
