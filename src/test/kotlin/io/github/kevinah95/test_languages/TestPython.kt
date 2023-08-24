@@ -81,4 +81,40 @@ class testParserForPython {
         val functions = getPythonFunctionList(sourceCode)
         assertEquals(2, functions.size)
     }
+
+    @Test
+    fun testMultiLineFunctionDefFunctionEnd() {
+        val sourceCode = """
+            
+            def foo(arg1,
+                arg2,
+            ):
+                # comment
+                return True
+
+            def foo2(arg1,
+                arg2,
+                arg3
+            ):
+                if True:
+                    return False
+                """.trimIndent()
+        val functions = getPythonFunctionList(sourceCode)
+        assertEquals(6, functions[0].endLine)
+        assertEquals(13, functions[1].endLine)
+    }
+
+    @Test
+    fun testMultiLineFunctionDefWithIndentationMoreThanFunctionBody() {
+        val sourceCode = """
+            def function(arg1,
+                     arg2
+                     ):
+                if True:
+                    return False
+                """.trimIndent()
+        val functions = getPythonFunctionList(sourceCode)
+        assertEquals(5, functions[0].nloc)
+        assertEquals(5, functions[0].endLine)
+    }
 }
