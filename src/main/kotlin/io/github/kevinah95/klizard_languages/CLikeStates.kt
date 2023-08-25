@@ -20,7 +20,7 @@ package io.github.kevinah95.klizard_languages
 
 import io.github.kevinah95.FileInfoBuilder
 
-class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
+open class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
     val parameterBracketOpen = "(<"
     val parameterBracketClose = ")>"
     var bracketStack = mutableListOf<String>()
@@ -28,7 +28,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
     override var commandsByName = listOf(::_stateFunction, ::_stateDecToImp).associateBy { it.name }
 
-    fun tryNewFunction(name: String) {
+    open fun tryNewFunction(name: String) {
         context.tryNewFunction(name)
         _state = ::_stateFunction
         if (name == "operator") {
@@ -156,7 +156,7 @@ class CLikeStates(context: FileInfoBuilder) : CodeStateMachine(context) {
         _state(token)
     }
 
-    fun _stateOldCParams(token: String) {
+    open fun _stateOldCParams(token: String) {
         _savedTokens.add(token)
         if (token == ";") {
             _savedTokens = mutableListOf<String>()

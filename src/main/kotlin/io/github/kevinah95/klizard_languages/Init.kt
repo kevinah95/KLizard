@@ -24,7 +24,8 @@ fun languages(): List<CodeReader> {
     return listOf<CodeReader>(
         CLikeReader(),
         CSharpReader(),
-        PythonReader()
+        PythonReader(),
+        JavaReader()
     )
 }
 
