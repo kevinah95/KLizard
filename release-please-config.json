@@ -2,7 +2,7 @@
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
-      "release-type": "java",
+      "release-type": "simple",
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
@@ -10,6 +10,7 @@
     }
   },
   "extra-files": [
+    "README.md",
     "buildSrc/src/main/kotlin/com/github/kevinah95/klizard/Configuration.kt",
     "gradle.properties"
   ],
