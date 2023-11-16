@@ -22,5 +22,5 @@ object Configuration {
   const val patchVersion = 0 // x-release-please-patch
   const val versionName = "$majorVersion.$minorVersion.$patchVersion"
   const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}-SNAPSHOT"
-  const val artifactGroup = "com.github.kevinah95"
+  const val artifactGroup = "io.github.kevinah95"
 }
