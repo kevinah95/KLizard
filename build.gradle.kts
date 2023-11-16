@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
     id("java-library")
     id("com.vanniktech.maven.publish") version "0.25.3"
-}
+    }
 
 repositories {
     mavenCentral()
@@ -22,12 +22,6 @@ tasks.test {
 
 kotlin {
     jvmToolchain(8)
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
 }
 
 apply(from = "${rootDir}/scripts/publish-module.gradle.kts")
