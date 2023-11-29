@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1](https://github.com/kevinah95/KLizard/compare/v0.1.0...v0.1.1) (2023-11-29)
+
+
+### Features
+
+* Add Go language implementation ([367dbce](https://github.com/kevinah95/KLizard/commit/367dbceda5a92a0f0b30854ceb95415d4da4619b))
+* Add Go language implementation ([36544b0](https://github.com/kevinah95/KLizard/commit/36544b06760723a9c10cd0d2d0add03e23470a24))
+* **ci:** add commit with commitizen ([6f50fe4](https://github.com/kevinah95/KLizard/commit/6f50fe4c0592051a0c70b3d1b144386286d0fa97))
+
+
+### Documentation
+
+* Add FOSSA shield ([af2db07](https://github.com/kevinah95/KLizard/commit/af2db0763d80de77edb0068528ef75da6693d7fd))
+* **changelog:** remove old versions ([6f50fe4](https://github.com/kevinah95/KLizard/commit/6f50fe4c0592051a0c70b3d1b144386286d0fa97))
+* Update README.md ([367dbce](https://github.com/kevinah95/KLizard/commit/367dbceda5a92a0f0b30854ceb95415d4da4619b))
+
+
+### Miscellaneous Chores
+
+* release 0.1.1 ([66edcee](https://github.com/kevinah95/KLizard/commit/66edcee273c2bccff9cc21597918e9c3277e981e))
+
 ## [0.1.0](https://github.com/kevinah95/KLizard/compare/v0.1.2...v0.1.0) (2023-11-29)
 
 
