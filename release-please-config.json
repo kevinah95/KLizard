@@ -2,7 +2,7 @@
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
-      "release-type": "simple",
+      "release-type": "java",
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
@@ -10,9 +10,7 @@
     }
   },
   "extra-files": [
-    "README.md",
-    "buildSrc/src/main/kotlin/com/github/kevinah95/klizard/Configuration.kt",
-    "gradle.properties"
+    "build.gradle.kts"
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
 }

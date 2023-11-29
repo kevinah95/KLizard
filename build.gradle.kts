@@ -16,13 +16,16 @@
  * limitations under the License.
  */
 
-import com.github.kevinah95.klizard.Configuration
+import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     kotlin("jvm") version "1.9.0"
     id("java-library")
     id("com.vanniktech.maven.publish") version "0.25.3"
 }
+
+group = "io.github.kevinah95"
+version = "0.1.0" // x-release-please-version
 
 repositories {
     mavenCentral()
@@ -42,22 +45,51 @@ kotlin {
     jvmToolchain(8)
 }
 
-apply(from = "${rootDir}/scripts/publish-module.gradle.kts")
-
 mavenPublishing {
+    // Configuring Maven Central
+    // See: https://vanniktech.github.io/gradle-maven-publish-plugin/central/#configuring-maven-central
+    publishToMavenCentral(SonatypeHost.S01, true)
+
+    signAllPublications()
+
+    // Configuring POM
+    // See: https://vanniktech.github.io/gradle-maven-publish-plugin/central/#configuring-the-pom
     val artifactId = "klizard"
+
     coordinates(
-        Configuration.artifactGroup,
+        group.toString(),
         artifactId,
-        rootProject.extra.get("libVersion").toString()
+        version.toString()
     )
 
     pom {
         name.set(artifactId)
         description.set(
-            "Kotlin version of a simple code complexity analyser " +
-            "without caring about the C/C++ header files or Java imports, " +
-            "supports most of the popular languages."
+            "KLizard is an extensible Cyclomatic Complexity Analyzer for many programming languages including C/C++ " +
+                    "(doesn''t require all the header files or Java imports). " +
+                    "It also does copy-paste detection (code clone detection/code duplicate detection) and many other " +
+                    "forms of static code analysis."
         )
+        url.set("https://github.com/kevinah95/KLizard/")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("kevinah95")
+                name.set("Kevin Hernández Rostrán")
+                url.set("https://github.com/kevinah95/")
+                email.set("kevinah95@gmail.com")
+            }
+        }
+        scm {
+            url.set("https://github.com/kevinah95/KLizard/")
+            connection.set("scm:git:git://github.com/kevinah95/KLizard.git")
+            developerConnection.set("scm:git:ssh://git@github.com/kevinah95/KLizard.git")
+        }
     }
 }
