@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0](https://github.com/kevinah95/KLizard/compare/v0.5.0...v1.0.0) (2023-11-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* Now states return Boolean?
+
+### Bug Fixes
+
+* change invoke implementation in CodeStateMachine ([ae825a5](https://github.com/kevinah95/KLizard/commit/ae825a5973875e87ec0f14f0ec0ffb2ce477c76f))
+
 ## [0.5.0](https://github.com/kevinah95/KLizard/compare/v0.4.0...v0.5.0) (2023-11-30)
 
 
