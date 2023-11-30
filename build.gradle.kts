@@ -45,6 +45,20 @@ kotlin {
     jvmToolchain(8)
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "githubPackages"
+            url = uri("https://maven.pkg.github.com/kevinah95/klizard")
+            // username and password (a personal Github access token) should be specified as
+            // `githubPackagesUsername` and `githubPackagesPassword` Gradle properties or alternatively
+            // as `ORG_GRADLE_PROJECT_githubPackagesUsername` and `ORG_GRADLE_PROJECT_githubPackagesPassword`
+            // environment variables
+            credentials(PasswordCredentials::class)
+        }
+    }
+}
+
 mavenPublishing {
     // Configuring Maven Central
     // See: https://vanniktech.github.io/gradle-maven-publish-plugin/central/#configuring-maven-central
