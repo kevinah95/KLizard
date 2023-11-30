@@ -64,14 +64,12 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - name: Grant Permission to Execute Gradle
-        run: chmod +x gradlew
-
-      - name: Release build
-        run: ./gradlew assemble
-
-      - name: Publish to GitHub Packages
-        run: ./gradlew publishAllPublicationsToGithubPackagesRepository -PRELEASE_SIGNING_ENABLED=false
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
+      - name: Publish package
+        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
+        with:
+          arguments: publishAllPublicationsToGithubPackagesRepository -PRELEASE_SIGNING_ENABLED=false
         env:
           ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
           ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GITHUB_TOKEN }}
