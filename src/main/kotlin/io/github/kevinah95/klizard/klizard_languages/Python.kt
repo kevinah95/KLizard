@@ -131,45 +131,53 @@ class PythonReader() : CodeReader() {
 
 class PythonStates(context: FileInfoBuilder, reader: CodeReader) : CodeStateMachine(context) {
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == "def") {
             _state = ::_function
         }
+        return null
     }
 
-    fun _function(token: String) {
+    fun _function(token: String): Boolean? {
         if (token != "(") {
             context.restartNewFunction(token)
             context.addToLongFunctionName("(")
         } else {
             _state = ::_dec
         }
+
+        return null
     }
 
-    fun _dec(token: String) {
+    fun _dec(token: String): Boolean? {
         if (token == ")") {
             _state = ::_stateColon
         } else {
             context.parameter(token)
-            return
+            return null
         }
         context.addToLongFunctionName(" $token")
+        return null
     }
 
-    fun _stateColon(token: String) {
+    fun _stateColon(token: String): Boolean? {
         if (token == ":") {
             next(::_stateFirstLine)
         } else {
             next(::_stateGlobal)
         }
+
+        return null
     }
 
-    fun _stateFirstLine(token: String) {
+    fun _stateFirstLine(token: String): Boolean? {
         _state = ::_stateGlobal
         if (token.startsWith(""""""""") || token.startsWith("'''")) {
             context.addNloc(-token.count { it == '\n' } - 1)
         }
         _stateGlobal(token)
+
+        return null
     }
 }
 

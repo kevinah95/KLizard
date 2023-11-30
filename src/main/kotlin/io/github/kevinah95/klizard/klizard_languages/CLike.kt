@@ -93,12 +93,13 @@ open class CLikeReader : CodeReader() {
 
 class CppRValueRefStates(context: FileInfoBuilder) : CodeStateMachine(context) {
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == "&&") {
             next(_rValueRef)
         } else if (token == "typedef") {
             next(_typedef)
         }
+        return null
     }
 
     val _rValueRef = readUntilThen("=;{})") { token: String, _: List<String> ->

@@ -36,10 +36,11 @@ class JavaReader : CLikeReader() {
 
 class JavaStates(context: FileInfoBuilder) : CLikeStates(context) {
 
-    override fun _stateOldCParams(token: String) {
+    override fun _stateOldCParams(token: String): Boolean? {
         if (token == "{"){
             _stateDecToImp(token)
         }
+        return null
     }
 
     override fun tryNewFunction(name: String) {
@@ -47,25 +48,29 @@ class JavaStates(context: FileInfoBuilder) : CLikeStates(context) {
         _state = ::_stateFunction
     }
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == "@"){
             _state = ::_stateDecorator
-            return
+            return null
         }
 
         super._stateGlobal(token)
+        return null
     }
 
-    fun _stateDecorator(token: String) {
+    fun _stateDecorator(token: String): Boolean? {
         _state = ::_statePostDecorator
+        return null
     }
 
-    fun _statePostDecorator(token: String) {
+    fun _statePostDecorator(token: String): Boolean? {
         if (token == "."){
             _state = ::_stateDecorator
         } else {
             _state = ::_stateGlobal
             _state(token)
         }
+
+        return null
     }
 }

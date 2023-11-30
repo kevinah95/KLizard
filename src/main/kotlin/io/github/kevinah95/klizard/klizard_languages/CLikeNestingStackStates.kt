@@ -25,7 +25,7 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
 
     override var commandsByName = listOf(::_stateGlobal, ::_readNamespace).associateBy { it.name }
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == "template") {
             _state = _templateDeclaration
         } else if (token == ".") {
@@ -37,19 +37,24 @@ class CLikeNestingStackStates(context: FileInfoBuilder) : CodeStateMachine(conte
         } else if (token == "}") {
             context.popNesting()
         }
+
+        return null
     }
 
-    fun _dot(token: String) {
+    fun _dot(token: String): Boolean? {
         _state = ::_stateGlobal
+        return null
     }
 
-    fun _readNamespace(token: String) {
+    fun _readNamespace(token: String): Boolean? {
         if (token == "[") {
             _state = _readAttribute
         } else {
             _state = _readNamespaceName
         }
         _state(token)
+
+        return null
     }
 
 

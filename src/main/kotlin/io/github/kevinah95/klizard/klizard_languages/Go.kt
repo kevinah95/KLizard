@@ -24,7 +24,6 @@ class GoReader : CodeReader() {
 
     override var ext: MutableList<String> = mutableListOf("go")
 
-    // TODO: Implement this
     val languageNames: List<String> = listOf("go")
 
     override operator fun invoke(_context: FileInfoBuilder) {

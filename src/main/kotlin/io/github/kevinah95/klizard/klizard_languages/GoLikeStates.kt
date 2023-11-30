@@ -23,7 +23,7 @@ import io.github.kevinah95.klizard.FileInfoBuilder
 open class GoLikeStates(context: FileInfoBuilder): CodeStateMachine(context) {
     val FUNC_KEYWORD = "func"
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == FUNC_KEYWORD) {
             _state = ::_functionName
             context.pushNewFunction("")
@@ -32,29 +32,29 @@ open class GoLikeStates(context: FileInfoBuilder): CodeStateMachine(context) {
         } else if (token in setOf("}")) {
             statemachineReturn()
         }
+
+        return null
     }
 
-    fun _functionName(token: String) {
+    fun _functionName(token: String): Boolean? {
         if (token != "`") {
             if (token == "(") {
                 if (context.stackedFunctions.size > 0 && context.stackedFunctions.last().name != "*global*") {
-                    next(_functionDec, token)
-                    return
+                    return next(_functionDec, token)
                 } else {
-                    next(_memberFunction, token)
-                    return
+                    return next(_memberFunction, token)
                 }
             }
             if (token == "{") {
-                next(::_expectFunctionImpl, token)
-                return
+                return next(::_expectFunctionImpl, token)
             }
             context.addToFunctionName(token)
             _state = ::_expectFunctionDec
         }
+        return null
     }
 
-    fun _expectFunctionDec(token: String) {
+    fun _expectFunctionDec(token: String): Boolean? {
         if (token == "(") {
             next(_functionDec, token)
         } else if (token == "<") {
@@ -62,6 +62,8 @@ open class GoLikeStates(context: FileInfoBuilder): CodeStateMachine(context) {
         } else {
             _state = ::_stateGlobal
         }
+
+        return null
     }
 
     val _generalize = readInsideBracketsThen("<>", "_expectFunctionDec") {token ->
@@ -80,18 +82,23 @@ open class GoLikeStates(context: FileInfoBuilder): CodeStateMachine(context) {
 
 
 
-    fun _expectFunctionImpl(token: String) {
+    fun _expectFunctionImpl(token: String): Boolean? {
         if (token == "{" && lastToken != "interface") {
             next(::_functionImpl, token)
         }
+
+        return null
     }
 
-    fun _functionImpl(token: String) {
+    fun _functionImpl(token: String): Boolean? {
         val callback = {
             _state = ::_stateGlobal
             context.endOfFunction()
         }
+        ///////////////////////////////////////
         subState(statemachineClone()._state, callback)
+
+        return null
     }
 
 

@@ -20,19 +20,22 @@ package io.github.kevinah95.klizard.lizard_ext
 
 class LizardMcCabe(): ExtensionBase() {
 
-    override fun _stateGlobal(token: String) {
+    override fun _stateGlobal(token: String): Boolean? {
         if (token == "case") {
             _state = ::_inCase
         }
+
+        return null
     }
 
-    fun _inCase(token: String){
+    fun _inCase(token: String): Boolean?{
         if (token == ":"){
             _state = ::_afterACase
         }
+        return null
     }
 
-    fun _afterACase(token: String) {
+    fun _afterACase(token: String): Boolean? {
         if (token == "case"){
             context.addCondition(-1)
             if (context::class.members.any { it.name == "add_nd_condition" }){
@@ -43,6 +46,8 @@ class LizardMcCabe(): ExtensionBase() {
         } else {
             next(::_stateGlobal)
         }
+
+        return null
     }
 
 }
