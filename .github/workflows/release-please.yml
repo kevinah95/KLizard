@@ -71,7 +71,7 @@ jobs:
         run: ./gradlew assemble
 
       - name: Publish to GitHub Packages
-        run: ./gradlew publishAllPublicationsToGithubPackagesRepository
+        run: ./gradlew publishAllPublicationsToGithubPackagesRepository -PRELEASE_SIGNING_ENABLED=false
         env:
           ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
           ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GITHUB_TOKEN }}
