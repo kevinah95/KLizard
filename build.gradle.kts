@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "io.github.kevinah95"
-version = "0.3.1-SNAPSHOT" // x-release-please-version
+version = "0.4.0" // x-release-please-version
 
 repositories {
     mavenCentral()
